@@ -53,4 +53,50 @@ class Predis
         }
         return $this->redis->get($key);
     }
+
+    /**
+     * 添加有序集合
+     * @param $key
+     * @param $value
+     * @return int
+     */
+    // public function sAdd($key, $value)
+    // {
+    //     return $this->redis->sAdd($key, $value);
+    // }
+
+    /**
+     * 删除有序集合
+     * @param $key
+     * @param $value
+     * @return int
+     */
+    // public function sRem($key, $value)
+    // {
+    //     return $this->redis->sRem($key, $value);
+    // }
+
+    /**
+     * 获取有序集合
+     * @param $key
+     * @return array
+     */
+    public function sMembers($key)
+    {
+        return $this->redis->sMembers($key);
+    }
+
+    /**
+     * 调用不存在的方法时 ，会执行该函数
+     * @param $name 不存在的函数名
+     * @param $arg  函数的参数，数组格式
+     * @return bool
+     */
+    public function __call($name, $arg)
+    {
+        if (count($arg) != 2) {
+            return false;
+        }
+        return $this->redis->$name($arg[0], $arg[1]);
+    }
 }

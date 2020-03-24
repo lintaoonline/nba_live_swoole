@@ -16,7 +16,7 @@ class Ws
     public function __construct()
     {
         $this->ws = new swoole_websocket_server(self::HOST, self::PORT);
-
+        // 重启时 获取sMember中的数据 有值得话则删除
         $this->ws->set(
             [
                 'enable_static_handler' => true,
@@ -144,6 +144,8 @@ class Ws
      */
     public function onOpen($ws, $request)
     {
+        // 把客户端fd存入redis
+        \app\common\lib\redis\Predis::getInstance()->sAdd(config('redis.live_game_key'),$request->fd);
         print_r('onOpen-fd is :' . $request->fd . "\r\n");
     }
 
@@ -154,7 +156,7 @@ class Ws
      */
     public function onMessage($ws, $frame)
     {
-        echo 'onMessage-ser-push-message' . $frame->data . "\r\n";
+        // echo 'onMessage-ser-push-message' . $frame->data . "\r\n";
         $ws->push($frame->fd, "server-push:" . date('Y-m-d H:i:s'));
     }
 
@@ -165,7 +167,9 @@ class Ws
      */
     public function onClose($ws, $fd)
     {
-        echo "clientid:{$fd}\n";
+        \app\common\lib\redis\Predis::getInstance()->sRem(config('redis.live_game_key'),$fd);
+        // 删除redis对应已连接的fd
+        // echo "clientid:{$fd}\n";
     }
 }
 
