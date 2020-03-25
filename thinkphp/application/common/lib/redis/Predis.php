@@ -25,6 +25,7 @@ class Predis
     {
         $this->redis = new \Redis();
         $result = $this->redis->connect(config('redis.host'), config('redis.port'), config('redis.time_out'));
+        $this->redis->auth('111111'); //设置密码
         if ($result === false) {
             throw new \Exception('redis connect error');
         }
