@@ -9,7 +9,7 @@ class Live
 {
     public function push()
     {
-        print_r($_GET);
+        // print_r($_GET);
 
         // 官方获取连接的用户
         // foreach ($server->connections as $fd) {
@@ -22,11 +22,38 @@ class Live
         // $_POST['http_server']->push(3, 'hello-from-server');
 
 
-        $clients = Predis::getInstance()->sMembers(config('redis.live_game_key'));
-        print_r($clients);
-        foreach ($clients as $fd) {
-            $_POST['http_server']->push($fd,'hello1234');
+        if (empty($_GET)) {
+            return Util::show(config('code.error'), 'error');
         }
+
+        $teams = [
+            1 => [
+                'name' => '马刺',
+                'logo' => '/live/imgs/team1.png',
+            ],
+            4 => [
+                'name' => '火箭',
+                'logo' => '/live/imgs/team2.png',
+            ],
+        ];
+
+        $data = [
+            'type' => intval($_GET['type']),
+            'title' => !empty($teams[$_GET['team_id']]) ? $teams[$_GET['team_id']]['name'] : '直播员',
+            'logo' => !empty($teams[$_GET['team_id']]) ? $teams[$_GET['team_id']]['logo'] : '',
+            'content' => !empty($_GET['content']) ? $_GET['content'] : '',
+            'image' => !empty($_GET['image']) ? $_GET['image'] : '',
+        ];
+
+        $taskData = [
+            'method' => 'pushLive',
+            'data' => $data,
+        ];
+
+        $_POST['http_server']->task($taskData);
+        return Util::show(config('code.success'), 'ok');
+
+
     }
 
 }

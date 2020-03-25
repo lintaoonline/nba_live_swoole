@@ -19,14 +19,8 @@ class Task
      * 异步发送验证码
      * @param $data
      */
-    public function sendSms($data)
+    public function sendSms($data,$serv)
     {
-        // try {
-        //     $response = Sms::sendSms($data['phone'], $data['code']);
-        // } catch (\Exception $e) {
-        //     return false;
-        // }
-
         $response = Sms::sendSms($data['phone'], $data['code']);
         if (!$response) {
             return false;
@@ -40,7 +34,19 @@ class Task
         } else {
             return false;
         }
-
         return true;
+    }
+
+    /**
+     * task机制发送赛况数据
+     * @param $data
+     * @param $serv swoole server对象
+     *
+     */
+    public function pushLive($data,$serv){
+        $clients = Predis::getInstance()->sMembers(config('redis.live_game_key'));
+        foreach ($clients as $fd) {
+            $serv->push($fd, json_encode($data));
+        }
     }
 }
