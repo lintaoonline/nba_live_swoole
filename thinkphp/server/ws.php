@@ -10,12 +10,15 @@ class Ws
 {
     CONST HOST = "0.0.0.0";
     CONST PORT = 8811;
+    CONST CHART_PORT = 8812;
 
     public $http = null;
 
     public function __construct()
     {
         $this->ws = new swoole_websocket_server(self::HOST, self::PORT);
+        // 多端口监听
+        $this->ws->listen(self::HOST, self::CHART_PORT,SWOOLE_SOCK_TCP);
         // 重启时 获取sMember中的数据 有值得话则删除
         $this->ws->set(
             [
@@ -144,6 +147,7 @@ class Ws
      */
     public function onOpen($ws, $request)
     {
+        // print_r($ws);
         // 把客户端fd存入redis
         \app\common\lib\redis\Predis::getInstance()->sAdd(config('redis.live_game_key'),$request->fd);
         print_r('onOpen-fd is :' . $request->fd . "\r\n");
